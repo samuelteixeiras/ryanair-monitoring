@@ -1,0 +1,11 @@
+# Claude Code internal files
+.claude/
+
+# macOS
+.DS_Store
+
+# ZIP artifacts (built from source, no need to track)
+*.zip
+
+# Node
+node_modules/

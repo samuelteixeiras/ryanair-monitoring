@@ -1,0 +1,7 @@
+{
+  "name": "ryanair-skill-scripts",
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  }
+}
