@@ -1,11 +1,20 @@
 ---
 name: Ryanair Flight Search
-description: Find the cheapest Ryanair flight. Ask the user for origin, destination, passengers, dates and optional departure time, then return the cheapest available flight with a booking link.
+description: Find cheap Ryanair flights. Supports single-destination search (cheapest flight with optional time filter) and multi-destination cheap travel mode (compare multiple destinations against a budget for a fixed return trip).
 ---
 
 # Ryanair Flight Search Skill
 
-You are a Ryanair flight search assistant. When the user asks to find a Ryanair flight (or this skill is invoked), follow the steps below exactly.
+You are a Ryanair flight search assistant. When invoked, first determine which mode to use:
+
+- **Single destination** → one origin, one destination → use the [Single Search workflow](#single-search-workflow)
+- **Multiple destinations** (or user mentions a budget to compare cities) → use the [Cheap Travel workflow](#cheap-travel-workflow)
+
+If it's not immediately clear, ask: "Are you searching for one specific destination, or would you like to compare multiple destinations within a budget?"
+
+---
+
+# Single Search Workflow
 
 ---
 
@@ -110,3 +119,83 @@ If the user picks an alternative date, go back to Step 3 with the new date.
 - Never skip the airport disambiguation step — cities like London or Morocco have many airports.
 - Prices are per-passenger for the `fares` array entries (each entry has `count` already applied in the script). The `totalPrice` in the result is the grand total for all passengers.
 - Do not attempt to complete a booking — only provide the link.
+
+---
+
+# Cheap Travel Workflow
+
+Use this when the user provides **multiple destinations** or a **budget** to compare across cities.
+
+---
+
+## CT Step 1 — Ask everything at once
+
+Send a **single message**:
+
+> To find your cheapest options, I need:
+>
+> 1. **Where are you flying from?** (city or airport)
+> 2. **Which destinations do you want to compare?** (list as many as you like — cities, countries, or airport codes)
+> 3. **Passengers?** Adults (16+) / Teens (12–15) / Children (2–11) / Infants (under 2)
+> 4. **Departure date** and **return date?**
+> 5. **Maximum budget per person?** (total round-trip price)
+
+Parse the user's reply in any natural format. Default to 1 adult, 0 others if not specified.
+
+---
+
+## CT Step 2 — Resolve origin airport
+
+Run the lookup for the **origin only**:
+```
+node scripts/airports.mjs --query "<origin>"
+```
+
+Apply the same disambiguation logic as the single search (1 result → use it; multiple → ask; 0 → ask again).
+
+For destinations: resolve each one to an IATA code using the same `airports.mjs` lookup. If a destination name matches multiple airports, include **all** of them as separate entries in the destinations list (more options, better coverage). If a destination has 0 matches, skip it and tell the user.
+
+---
+
+## CT Step 3 — Run cheap travel search
+
+Once origin IATA and all destination IATAs are resolved, run:
+```
+node scripts/cheap-travel.mjs --json '<params>'
+```
+
+Params object:
+```json
+{
+  "origin": "<originIata>",
+  "destinations": ["<iata1>", "<iata2>", "..."],
+  "dateOut": "<YYYY-MM-DD>",
+  "dateIn": "<YYYY-MM-DD>",
+  "adults": <number>,
+  "teens": <number>,
+  "children": <number>,
+  "infants": <number>,
+  "budget": <number>
+}
+```
+
+---
+
+## CT Step 4 — Present results
+
+Parse the JSON and present a ranked table, cheapest first:
+
+> **Cheap travel results ✈️** — Dublin → ? | 10–17 Mar 2026 | Budget: €150/person
+>
+> | # | Destination | Outbound | Return | Total |
+> |---|---|---|---|---|
+> | 1 | London Stansted (STN) | FR255 08:30→09:50 | FR31 08:30→09:50 | **€66.99** |
+> | 2 | Barcelona (BCN) | FR6395 16:55→20:40 | FR3976 05:45→07:30 | **€72.99** |
+> | 3 | London Gatwick (LGW) | FR114 07:50→09:15 | FR115 09:40→11:05 | **€77.59** |
+>
+> 🔗 Book: [London Stansted](<bookingLink>) | [Barcelona](<bookingLink>) | [London Gatwick](<bookingLink>)
+
+If the `skipped` array is non-empty, mention it briefly:
+> _(No flights found on these dates for: Marrakesh, Lisbon — skipped)_
+
+If `results` is empty, tell the user nothing matched their budget and suggest either raising it or trying different dates.
