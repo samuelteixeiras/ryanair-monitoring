@@ -8,19 +8,20 @@
  *
  * If the query matches more than one city, all airports for all matching
  * cities are returned so Claude can ask the user to pick one.
+ *
+ * Airport data is read from the bundled resources/airports.json —
+ * no API call needed.
  */
 
-const AIRPORTS_URL =
-  'https://www.ryanair.com/api/views/locate/5/airports/en/active';
+import { readFileSync } from 'fs';
+import { fileURLToPath } from 'url';
+import { join, dirname } from 'path';
 
-async function fetchAllAirports() {
-  const res = await fetch(AIRPORTS_URL, {
-    headers: { 'User-Agent': 'Mozilla/5.0' },
-  });
-  if (!res.ok) {
-    throw new Error(`Failed to fetch airports: ${res.status} ${res.statusText}`);
-  }
-  return res.json();
+const __dir = dirname(fileURLToPath(import.meta.url));
+const AIRPORTS_FILE = join(__dir, '..', 'resources', 'airports.json');
+
+function loadAllAirports() {
+  return JSON.parse(readFileSync(AIRPORTS_FILE, 'utf8'));
 }
 
 function normalize(str) {
@@ -42,8 +43,8 @@ function findAirports(query, airports) {
 
   return airports
     .filter((a) => {
-      const city = normalize(a.city?.name ?? '');
-      const country = normalize(a.country?.name ?? '');
+      const city = normalize(a.city ?? '');
+      const country = normalize(a.country ?? '');
       const iata = (a.iataCode ?? '').toLowerCase();
       const airportName = normalize(a.name ?? '');
       return (
@@ -56,8 +57,8 @@ function findAirports(query, airports) {
     .map((a) => ({
       iataCode: a.iataCode,
       name: a.name,
-      city: a.city?.name ?? '',
-      country: a.country?.name ?? '',
+      city: a.city ?? '',
+      country: a.country ?? '',
     }));
 }
 
@@ -73,7 +74,7 @@ if (queryFlagIdx === -1 || !args[queryFlagIdx + 1]) {
 const query = args[queryFlagIdx + 1];
 
 try {
-  const all = await fetchAllAirports();
+  const all = loadAllAirports();
   const results = findAirports(query, all);
   console.log(JSON.stringify(results, null, 2));
 } catch (err) {
