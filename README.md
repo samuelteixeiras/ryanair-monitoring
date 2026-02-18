@@ -8,7 +8,6 @@ A Claude Skill for searching cheap Ryanair flights, with a future price monitori
 
 - Node.js 18+
 - Claude (Pro, Max, Team or Enterprise) with **code execution enabled**
-- `gh` CLI (only needed to push updates to this repo)
 
 ---
 
