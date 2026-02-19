@@ -1,5 +1,5 @@
 ---
-name: Ryanair Flight Search
+name: ryanair-flight-search
 description: Find cheap Ryanair flights. Supports single-destination search (cheapest flight with optional time filter) and multi-destination cheap travel mode (compare multiple destinations against a budget for a fixed return trip).
 ---
 
