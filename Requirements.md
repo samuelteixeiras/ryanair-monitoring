@@ -1,5 +1,5 @@
 ## About this application:
-
+It needs to be used with Claude Code, on clade.ai it can't call ryanair.com website
 We have two goals 
 
 1 - Create a Claude skill to get information about Ryan Air flight:
