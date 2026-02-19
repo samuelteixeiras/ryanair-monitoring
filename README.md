@@ -112,3 +112,6 @@ ryanair-monitoring/
 | `GET /api/farfnd/v4/oneWayFares/{origin}/{destination}/availabilities` | Available dates for a route |
 
 Full collection: `resources/Airports.postman_collection.json`
+
+
+API Reference from: https://www.postman.com/hakkotsu/ryanair/overview
