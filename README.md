@@ -4,6 +4,14 @@ A Claude Skill for searching cheap Ryanair flights, with a future price monitori
 
 ---
 
+## Demo
+
+[![Watch the demo](https://img.youtube.com/vi/V1tgD3ohLBE/maxresdefault.jpg)](https://youtu.be/V1tgD3ohLBE)
+
+[Full demo](youtube.com/watch?v=Z5eGJwhYVDA&feature=youtu.be)
+---
+
+
 ## Requirements
 
 - Node.js 18+
