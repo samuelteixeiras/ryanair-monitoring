@@ -117,7 +117,7 @@ If the user picks an alternative date, go back to Step 3 with the new date.
 
 - Always run the scripts exactly as shown — do not make up flight data.
 - Never skip the airport disambiguation step — cities like London or Morocco have many airports.
-- Prices are per-passenger for the `fares` array entries (each entry has `count` already applied in the script). The `totalPrice` in the result is the grand total for all passengers.
+- `totalPrice` in the result is the grand total for **all passengers combined**. `pricePerPerson` is `totalPrice` divided by the number of paying passengers (adults + teens + children). Always display `pricePerPerson` as the "per person" price and `totalPrice` as the "total" — never swap them.
 - Do not attempt to complete a booking — only provide the link.
 
 ---
@@ -183,15 +183,17 @@ Params object:
 
 ## CT Step 4 — Present results
 
-Parse the JSON and present a ranked table, cheapest first:
+Parse the JSON and present a ranked table, cheapest first.
 
-> **Cheap travel results ✈️** — Dublin → ? | 10–17 Mar 2026 | Budget: €150/person
+Use `pricePerPerson` for the **Per person** column and `totalPrice` for the **Total** column. The table is sorted by `pricePerPerson` ascending (cheapest per person first).
+
+> **Cheap travel results ✈️** — Dublin → ? | 10–17 Mar 2026 | Budget: €150/person × 2 adults
 >
-> | # | Destination | Outbound | Return | Total |
-> |---|---|---|---|---|
-> | 1 | London Stansted (STN) | FR255 08:30→09:50 | FR31 08:30→09:50 | **€66.99** |
-> | 2 | Barcelona (BCN) | FR6395 16:55→20:40 | FR3976 05:45→07:30 | **€72.99** |
-> | 3 | London Gatwick (LGW) | FR114 07:50→09:15 | FR115 09:40→11:05 | **€77.59** |
+> | # | Destination | Outbound | Return | Per person | Total (2 adults) |
+> |---|---|---|---|---|---|
+> | 1 | London Stansted (STN) | FR255 08:30→09:50 | FR31 08:30→09:50 | **€33.50** | €67.00 |
+> | 2 | Barcelona (BCN) | FR6395 16:55→20:40 | FR3976 05:45→07:30 | **€36.50** | €73.00 |
+> | 3 | London Gatwick (LGW) | FR114 07:50→09:15 | FR115 09:40→11:05 | **€38.80** | €77.59 |
 >
 > 🔗 Book: [London Stansted](<bookingLink>) | [Barcelona](<bookingLink>) | [London Gatwick](<bookingLink>)
 

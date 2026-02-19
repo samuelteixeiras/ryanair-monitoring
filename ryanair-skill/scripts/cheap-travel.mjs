@@ -134,12 +134,15 @@ async function searchDestination(params, destination) {
   if (!bestOut || !bestIn) return null;
 
   const totalPrice = totalFare(bestOut) + totalFare(bestIn);
+  const paidPassengers = (params.adults ?? 1) + (params.teens ?? 0) + (params.children ?? 0);
+  const pricePerPerson = Math.round((totalPrice / Math.max(paidPassengers, 1)) * 100) / 100;
 
   return {
     destination,
     destinationName: trips[0]?.destinationName ?? destination,
     outbound: formatFlight(bestOut, currency, 'Outbound'),
     inbound: formatFlight(bestIn, currency, 'Return'),
+    pricePerPerson,
     totalPrice: Math.round(totalPrice * 100) / 100,
     currency,
     bookingLink: buildBookingLink({ ...params, destination }),
@@ -202,7 +205,7 @@ for (let i = 0; i < destinations.length; i++) {
     continue;
   }
 
-  if (value.totalPrice <= budget) {
+  if (value.pricePerPerson <= budget) {
     affordable.push(value);
   }
   // over budget — silently drop (no flights issue is skipped, over-budget is just not shown)
